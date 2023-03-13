@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: web-replicaset2
+  labels:
+    tier: production
+
+spec:
+  replicas: 7
+  selector:
+    matchLabels:
+      type: web
+  template:
+    metadata:
+      name: test-pod
+      labels:
+        type: web
+    spec:
+      containers:
+        - name: web-pod
+          image: sayedppqq/api-server
