@@ -16,8 +16,8 @@ spec:
         app: ubuntu
     spec:
       containers:
-      - image: ubuntu
+      - image: sayedppqq/api-server
         imagePullPolicy: IfNotPresent
-        name: ubuntu
+        name: api-server
         command: ["/bin/sleep", "3650d"]
         resources: {}
