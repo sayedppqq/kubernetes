@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-printer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pod-printer
+  template:
+    metadata:
+      labels:
+        app: pod-printer
+    spec:
+      containers:
+      - name: pod-printer
+        image: sayedppqq/client-go
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
