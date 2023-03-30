@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaSpec.replicas }}
+  selector:
+    matchLabels:
+      {{- range $key , $value := .Values.replicaSpec.matchLabels }}
+      {{ $key }}: {{ $value }}
+      {{- end }}
+  template:
+    metadata:
+      labels:
+        {{- range $key , $value := .Values.replicaSpec.matchLabels }}
+        {{ $key }}: {{ $value }}
+        {{- end }}
+    spec:
+      containers:
+      - image: {{ .Values.containerSpec.image }}
+        imagePullPolicy: IfNotPresent
+        name: {{ .Values.containerSpec.name }}
+        ports:
+          -containerPort: {{ .Values.containerSpec.port }}

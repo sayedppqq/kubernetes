@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  type: {{ .Values.service.nodePort }}
+  selector:
+    {{- range $key , $value := .Values.replicaSpec.matchLabels }}
+    {{ $key }}: {{ $value }}
+    {{- end }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.containerSpec.port }}
+      nodePort: {{ .Values.service.nodePort }}

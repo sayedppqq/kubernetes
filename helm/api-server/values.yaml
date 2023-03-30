@@ -1,0 +1,20 @@
+# Default values for api-server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+containerSpec:
+  name: api-server
+  image: sayedppqq/api-server
+  port: 8080
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 30040
+  protocol: TCP
+
+replicaSpec:
+  replicas: 2
+  matchLabels:
+    app: api-server
+
