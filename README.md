@@ -191,3 +191,118 @@ spec:
 This YAML code creates a ReplicaSet named **`my-replicaset`** with a desired state of three replicas. The **`selector`** field specifies that the ReplicaSet should manage all Pods with the **`app=my-app`** label. The **`template`** field specifies the Pod template that should be used for each replica managed by the ReplicaSet. In this example, the template contains a single container named **`my-container`** that uses the **`my-image`** image and exposes port 80.
 
 When this YAML code is applied to a Kubernetes cluster, the ReplicaSet will create and manage three replicas of the specified Pod template. If any of the replicas go down, the ReplicaSet will automatically replace them to maintain the desired state of three replicas.
+
+- **Deployment set**
+
+In Kubernetes, a DeploymentSet (also known as Deployment) is a resource object that provides declarative updates for Pods and ReplicaSets. It manages the creation, scaling, and updating of a set of identical Pods, ensuring that the desired number of replicas are always available and that they are replaced or updated when necessary.
+
+A DeploymentSet is defined using a YAML or JSON configuration file, which specifies the desired state of the deployment. This includes the number of replicas to create, the container images to use, and any other relevant information about the deployment.
+
+When a DeploymentSet is created, it creates a ReplicaSet, which is responsible for managing the Pods. The ReplicaSet ensures that the desired number of replicas are running and replaces them if they fail or are terminated. The DeploymentSet then monitors the ReplicaSet and makes updates to it as necessary, such as scaling it up or down, rolling out a new version of the application, or rolling back to a previous version.
+
+One of the key benefits of using a DeploymentSet is that it allows for seamless updates and rollbacks. When updating an application, a new ReplicaSet is created with the updated configuration, and the old ReplicaSet is gradually scaled down as the new one is scaled up. If there are any issues with the new configuration, the DeploymentSet can quickly roll back to the previous version. Here is an example YAML configuration file for a basic DeploymentSet: 
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-container
+        image: my-image:latest
+        ports:
+        - containerPort: 80
+```
+
+There are two main update strategies available in Kubernetes: RollingUpdate and Recreate.
+
+1. RollingUpdate strategy: This strategy is the default for DeploymentSets. When a new version of the container image or configuration is deployed, the RollingUpdate strategy updates the replicas gradually, one at a time. This ensures that there is always a certain number of available replicas during the update process, reducing the risk of downtime. The RollingUpdate strategy also allows for a configurable percentage of maxUnavailable and maxSurge pods, which control how many pods can be unavailable during the update process and how many additional pods can be created during the update process.
+2. Recreate strategy: This strategy updates all the replicas at once, creating new replicas and terminating the old ones simultaneously. This can result in downtime during the update process, but it can be faster and simpler than the RollingUpdate strategy, especially when there are only a few replicas.
+
+## Probes ##
+
+Slowing down rollouts in Kubernetes is a good practice to ensure the health and stability of your service. Here are some tips for slowing down rollouts:
+
+1. Configure your deployment strategy: Kubernetes offers various deployment strategies, such as rolling updates and blue-green deployments, that allow you to control how fast and how safely your updates are rolled out. Choose a deployment strategy that fits your needs and configure it accordingly.
+2. Use readiness and liveness probes: Kubernetes provides readiness and liveness probes that allow you to define health checks for your containers. These probes can be used to ensure that your service is healthy before the next set of containers are rolled out. By configuring these probes, you can avoid rolling out updates to containers that are not ready to serve traffic.
+3. Set maxUnavailable and maxSurge values: When configuring your deployment, you can set the maxUnavailable and maxSurge values to control the number of pods that are unavailable and the number of new pods that are created during a rollout. By setting these values appropriately, you can control the rate at which the new containers are rolled out.
+4. Monitor your service: Set up monitoring for your service to detect any issues that might arise during a rollout. Use tools like Prometheus or Grafana to monitor the health and performance of your service. This can help you catch any issues early and prevent them from affecting your users.
+5. Use canary deployments: Canary deployments allow you to roll out updates to a small percentage of users before rolling out to everyone. This allows you to test your updates in a safe environment before rolling out to everyone. If any issues are detected during the canary deployment, you can roll back the update before it affects everyone.
+
+By following these best practices, you can ensure that your Kubernetes deployments are safe and stable, and that your users are not affected by any issues that might arise during a rollout.
+
+## Service ##
+
+[https://www.youtube.com/watch?v=T4Z7visMM4E&ab_channel=TechWorldwithNana](https://www.youtube.com/watch?v=T4Z7visMM4E&ab_channel=TechWorldwithNana)
+
+[https://www.youtube.com/watch?v=EF6c7MkOhkw&ab_channel=PavanElthepu](https://www.youtube.com/watch?v=EF6c7MkOhkw&ab_channel=PavanElthepu)
+
+https://s3-us-west-2.amazonaws.com/secure.notion-static.com/89104363-defe-4d5b-97e9-769b63aeceda/Untitled.png
+
+## CNI Plugins ##
+
+CNI (Container Network Interface) plugins are used in Kubernetes to enable communication between containers running on different nodes within the cluster. CNI plugins provide a standardized interface for network providers to integrate their network solutions with Kubernetes.To use a CNI plugin in Kubernetes, you need to install the plugin binary on each node in the cluster and configure Kubernetes to use the plugin. This can be done by setting the **`--network-plugin`**
+flag to **`cni`**when starting the Kubernetes API server and setting the **`--cni-conf-dir`**and **`--cni-bin-dir`**lags to specify the location of the CNI configuration and binary files.
+
+## Kindnet (Kind’s default CNI plugin) ##
+
+Kindnet is the default CNI (Container Network Interface) plugin used by KIND (Kubernetes IN Docker) to provide networking for the containers running in a Kubernetes cluster. **Here is how kindnet works:**
+
+1. Kindnet creates a virtual network interface on each node in the cluster. This interface is called "kindnet0" and is used to provide connectivity between the containers on the node.
+2. Each container in the cluster is assigned a unique IP address from a private IP address range (10.244.0.0/16 by default) by the kindnet plugin.
+3. Kindnet creates a virtual bridge device called "kind" on each node in the cluster. This bridge device is used to connect the "kindnet0" interface on each node to the other nodes in the cluster.
+4. Kindnet also creates a "kube-proxy" pod in the "kube-system" namespace. This pod is responsible for configuring the iptables rules on each node in the cluster to enable inter-pod communication.
+5. When a pod is created in the cluster, Kubernetes assigns it an IP address from the "kindnet" network range. Kindnet then configures the network interface of the containers in the pod and sets up the necessary routes and iptables rules to enable communication between the containers within the pod and with other pods in the cluster.
+
+In summary, kindnet creates a virtual network that connects the containers running in the Kubernetes cluster and provides network connectivity for the containers to communicate with each other. It also ensures that the networking configuration is consistent across all nodes in the cluster.
+
+## NetworkPolicy ##
+
+In Kubernetes, a NetworkPolicy is a specification that allows you to define rules for how pods can communicate with each other and with other network endpoints. There are several types of NetworkPolicy resources available in Kubernetes:
+
+1. **`PodSelector`**: This is the most basic type of NetworkPolicy. It allows you to define rules based on the labels assigned to pods. You can specify which pods are allowed to communicate with each other based on their labels.
+2. **`NamespaceSelector`**: This type of NetworkPolicy allows you to define rules based on the namespace in which the pods are located. You can specify which pods in a particular namespace are allowed to communicate with each other.
+3. **`Ingress`**: This type of NetworkPolicy allows you to define rules for incoming traffic to a pod. You can specify which sources are allowed to connect to the pod, and what ports they are allowed to use.
+4. **`Egress`**: This type of NetworkPolicy allows you to define rules for outgoing traffic from a pod. You can specify which destinations the pod is allowed to connect to, and what ports it is allowed to use.
+5. **`Peer`**: This type of NetworkPolicy allows you to define a specific pod as a peer to another pod. Peers can communicate with each other regardless of their label selectors or namespaces.
+
+It's important to note that not all Kubernetes network plugins support all types of NetworkPolicy resources, so you should check the documentation for your particular network plugin to see which types are supported.
+
+## DNS ##
+
+In Kubernetes, DNS (Domain Name System) is used to provide service discovery between different components within a cluster. Each pod in a Kubernetes cluster is assigned a unique IP address, but these addresses may change frequently due to scaling, upgrades, or other changes in the cluster. Using DNS names instead of IP addresses allows for more flexible communication between different components within the cluster.
+
+Kubernetes has a built-in DNS service that provides name resolution for all resources within the cluster. This service is called CoreDNS and is deployed as a Kubernetes deployment. CoreDNS can be used to resolve service names, pod names, and other resources within the cluster.
+
+To use DNS in Kubernetes, pods can simply use the DNS name of the service they want to communicate with instead of the IP address. For example, if a pod wants to communicate with a service named "my-service" in the same namespace, it can simply use the DNS name "my-service" to access it.
+
+Additionally, Kubernetes allows for custom DNS configurations to be used in the cluster. This can be useful in scenarios where a specific DNS server or configuration is required for certain applications or services within the cluster. Custom DNS configurations can be specified in the Kubernetes configuration file or through the use of annotations on specific resources within the cluster.
+
+**A DNS resolver** is a software component that is responsible for resolving domain names to IP addresses. In the context of Kubernetes, a DNS resolver is used by pods to resolve the DNS names of other pods or services within the cluster.
+
+When a pod sends a request to another pod or service within the cluster, it typically uses the DNS name of the destination rather than the IP address. **The DNS resolver is responsible for translating this DNS name to the appropriate IP address so that the pod can establish a connection with the destination.**
+
+## Services ##
+
+### NodePort ###
+
+[https://www.youtube.com/watch?v=eth7osiCryc&ab_channel=SrinathChalla](https://www.youtube.com/watch?v=eth7osiCryc&ab_channel=SrinathChalla)
+
+## Kubernetes Authentication and Authorization ##
+
+[https://www.youtube.com/watch?v=gPAP6JtBSR4&ab_channel=SudheerDevOps](https://www.youtube.com/watch?v=gPAP6JtBSR4&ab_channel=SudheerDevOps)
