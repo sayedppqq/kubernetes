@@ -10,7 +10,7 @@ containerSpec:
 service:
   type: NodePort
   port: 8080
-  nodePort: 30040
+  nodePort: 30041
   protocol: TCP
 
 replicaSpec:

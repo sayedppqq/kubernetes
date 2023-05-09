@@ -21,4 +21,4 @@ spec:
         imagePullPolicy: IfNotPresent
         name: {{ .Values.containerSpec.name }}
         ports:
-          -containerPort: {{ .Values.containerSpec.port }}
+        - containerPort: {{ .Values.containerSpec.port }}

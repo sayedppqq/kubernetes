@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}
 spec:
-  type: {{ .Values.service.nodePort }}
+  type: {{ .Values.service.type }}
   selector:
     {{- range $key , $value := .Values.replicaSpec.matchLabels }}
     {{ $key }}: {{ $value }}
